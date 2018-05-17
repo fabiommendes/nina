@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block body %}
+    <h1>Welcome to the internet :)</h1>
+
+    <p>Congratulations! Your miniserver is up and running!</p>
+
+    <p>You are seeing this page because you haven't defined an index page yet.</p>
+
+    <pre><code>
+        from miniserver import *
+
+        @route
+        def index():
+            return "Hello World!"
+    </code></pre>
+{% endblock %}
