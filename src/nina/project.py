@@ -3,6 +3,7 @@ import os
 import sys
 from collections import namedtuple
 
+from django.urls import path, include
 from django.core.management import ManagementUtility
 from sidekick import lazy
 
@@ -30,8 +31,11 @@ class Project:
     @property
     def urls(self):
         urls = []
-        for app, path in self.apps:
-            print(app, path)
+        for app, path_ in self.apps:
+            if path_ is None:
+                urls.extend(app.urls)
+            else:
+                urls.append(path(path_, include(apps.url)))
         return urls
 
     def __init__(self):
@@ -42,26 +46,26 @@ class Project:
         """
         Project initialization.
         """
+        os.environ['DJANGO_SETTINGS_MODULE'] = NINA_CONF_MODULE
+        sys.modules[NINA_CONF_MODULE] = self.settings
         self.init_urls_module()
 
     def init_urls_module(self):
         mod = importlib.import_module(NINA_URLS)
-        mod.urlpatterns[:] = self.get_urlpatterns()
+        mod.urlpatterns[:] = self.urls
         return mod
 
     def run(self):
         """
         Runs project.
         """
-        os.environ.setdefault('DEBUG', 'True')
         self.run_command('runserver')
 
     def run_command(self, command, *args, **kwargs):
         """
         Runs a Django command.
         """
-        os.environ['DJANGO_SETTINGS_MODULE'] = NINA_CONF_MODULE
-        sys.modules[NINA_CONF_MODULE] = self.settings
+        self.init_project()
         argv = ['nina cmd', command, *map(str, args), *to_argv(**kwargs)]
         utility = ManagementUtility(argv)
         utility.execute()
@@ -71,7 +75,6 @@ class Project:
         Mounts app inside project.
         """
         self.apps.append(MountedApp(app, path))
-
 
 def to_argv(**kwargs):
     args = []
