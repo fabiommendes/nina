@@ -1,3 +1,7 @@
+.. warning::
+
+   This project is no longer maintained. For single-file Django apps, see `nanodjango <https://github.com/radiac/nanodjango>`_. Unfinished local work is saved in the `wip-local` branch.
+
 ``nina`` is a Django-based microframework that can be used to quickly create
 small web applications. Nina is based on Django, but it is extremely simplified
 and requires no boilerplate. The goal is to provide a nice environment for
