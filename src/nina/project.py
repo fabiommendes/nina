@@ -24,7 +24,7 @@ class Project:
     def settings(self):
         mod = importlib.import_module(NINA_CONF_MODULE)
         conf = NinaConf(self, **extra_config(self))
-        mod.__dict__.update(conf.get_settings())
+        mod.__dict__.update(conf.load_settings())
         return mod
 
     @property
@@ -60,12 +60,15 @@ class Project:
         """
         Runs a Django command.
         """
-        os.environ['DJANGO_SETTINGS_MODULE'] = NINA_CONF_MODULE
-        sys.modules[NINA_CONF_MODULE] = self.settings
+        self.prepare_config()
         argv = ['nina cmd', command, *map(str, args), *to_argv(**kwargs)]
         utility = ManagementUtility(argv)
         utility.execute()
 
+    def prepare_config(self):
+        os.environ['DJANGO_SETTINGS_MODULE'] = NINA_CONF_MODULE
+        sys.modules[NINA_CONF_MODULE] = self.settings
+    
     def mount(self, app, path=None):
         """
         Mounts app inside project.
@@ -108,3 +111,4 @@ def extra_config(project):
 # Global project instance
 project = Project()
 run = project.run
+prepare_config = project.prepare_config

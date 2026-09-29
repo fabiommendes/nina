@@ -1,12 +1,12 @@
-from nina  import *
+from nina import *
 
 
-# Settings
-settings.TIME_ZONE = 'America/Sao_Paulo'
+app = App('blog')
+app.settings.TIME_ZONE = 'America/Sao_Paulo'
 
 
 # Models
-class Post(Model):
+class Post(app.Model):
     author = ref('auth.User')
     title = field(str, max_length=200)
     text = field(str)
@@ -14,18 +14,24 @@ class Post(Model):
     published_date = field(datetime)
 
     def publish(self):
-        self.published_date = now()
+        self.published_date = datetime.now()
         self.save()
+
+@query(Post)
+def posts(qs):
+    posts = qs.filter(obj.published_date > datetime.now())
+    return posts.order_by(-obj.created_date)
+    
 
 
 @route('', template='post-list.html')
-def index():
-    posts = Post.objects.filter(obj.published_date > now())
-    posts.order_by(-obj.created_date)
+def index(posts):
     return {'posts': posts, 'title': 'My Blog'}
 
 
-@route('{id}/')
-def post_detail(id):
-    post = Post.objects.get(id=id)
-    return {'post': post, 'title': post.title}
+@route('<model:post>/')
+def post_detail(post):
+    return {
+        'post': post, 
+        'title': post.title,
+    }

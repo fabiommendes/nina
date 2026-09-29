@@ -19,7 +19,10 @@ def run(file):
 
     with open(file) as F:
         source = F.read()
+        
     mod = compile(source, file, 'exec')
+    
+    nina.project.prepare_config()
     exec(mod, {})
 
     nina.project.mount(last_app())
